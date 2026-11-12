@@ -20,7 +20,8 @@ README) leaves right-click alone. Copy Rights covers a lot more.
 | Invisible selection highlight (`::selection { background: transparent }`) | Forced back to the system highlight colours |
 | Copy/cut blocking, "copying is not allowed" alerts | Page never sees the event, so the browser copies |
 | "Read more at https://…" appended to copied text | Same: you get exactly what you selected |
-| Paste blocked in inputs (`paste`, `beforeinput`, Ctrl+V keydown) | Page never sees it |
+| Paste blocked in inputs (`paste`, `beforeinput`, `drop`, Ctrl+V / Ctrl+Shift+V / Shift+Insert keydown, `onpaste="return false"`) | Page never sees it |
+| "Confirm your email": page lets the paste land, then wipes the field (in an `input` handler or on a timer) | Your pasted value is put back (with `input`/`change` events so frameworks like React pick it up). A page that only *reformats* your paste (phone numbers, upper-casing) is left alone |
 | "Share this quote / Tweet this / Ask AI" popups on selection | `mouseup`/`pointerup`/`touchend`/`selectionchange` are hidden from the page while text is selected (clicks on buttons and links still work) |
 | Ctrl+U (view source), F12, Ctrl+Shift+I/J/C/K, Ctrl+C/X/A hijacked | Page never sees those keys |
 | Inline `oncontextmenu="return false"` and similar | Never run: our listener goes first |
@@ -42,7 +43,8 @@ CSS goes in through `scripting.insertCSS({ origin: "USER" })`, so its
 Rich editors (`contenteditable`, e.g. Google Docs, Notion, Slack) handle
 copy/paste themselves. If the selection or focus is inside one, clipboard
 events pass through so the app keeps working. Plain `<input>`/`<textarea>`
-fields are where "no pasting your email twice" lives, so those *are* guarded.
+fields are where "no pasting your email twice" lives, so those *are* guarded:
+you paste where you want, when you want.
 Elements with `draggable="true"` (real drag-and-drop UIs) keep their drag
 events.
 

@@ -42,6 +42,13 @@
 </section>
 
 <section>
+  <h2>5b. "Confirm your email" (no pasting twice)</h2>
+  <p><input id="confirm-email" onpaste="return false" ondrop="return false" placeholder="Confirm email: paste, Shift+Insert, Ctrl+Shift+V, drop" size="50"></p>
+  <p><input id="delayed-clear" placeholder="Lets the paste land, wipes it 100ms later" size="50"></p>
+  <p><input id="formatter" placeholder="Upper-cases what you paste (legit, must be left alone)" size="50"></p>
+</section>
+
+<section>
   <h2>6. Selection popup</h2>
   <p id="popup-text">Select some of this text. No "Share this quote!" bubble should appear.</p>
 </section>
@@ -79,6 +86,20 @@
   input.addEventListener('paste', no('paste'));
   input.addEventListener('beforeinput', (e) => { if (e.inputType === 'insertFromPaste') no('beforeinput paste')(e); });
   input.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'v') no('ctrl+v')(e); });
+
+  const confirm = document.getElementById('confirm-email');
+  confirm.addEventListener('keydown', (e) => {
+    if ((e.shiftKey && e.key === 'Insert') || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v')) no('confirm paste key')(e);
+  });
+  confirm.addEventListener('input', (e) => {
+    if (e.inputType && e.inputType.startsWith('insertFrom')) { confirm.value = ''; log('page wiped confirm field'); }
+  });
+  const delayed = document.getElementById('delayed-clear');
+  delayed.addEventListener('input', (e) => {
+    if (e.inputType === 'insertFromPaste') setTimeout(() => { delayed.value = ''; log('page wiped delayed field'); }, 100);
+  });
+  const formatter = document.getElementById('formatter');
+  formatter.addEventListener('input', () => { formatter.value = formatter.value.toUpperCase(); });
 
   window.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase();

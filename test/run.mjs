@@ -97,6 +97,30 @@ try {
   check('copy is clean and paste into blocked input works',
     pasted.startsWith('Copy this.') && !pasted.includes('example.com'), JSON.stringify(pasted));
 
+  // No pasting twice: every paste route into a hostile "confirm" field.
+  const pasteInto = async (id, keys) => {
+    // Clear like a user would (trusted input event), not via script.
+    await (await find(id)).click();
+    await driver.actions().keyDown(MOD).sendKeys('a').keyUp(MOD).sendKeys(Key.BACK_SPACE).perform();
+    await keys();
+  };
+  await pasteInto('confirm-email', () => driver.actions().keyDown(MOD).sendKeys('v').keyUp(MOD).perform());
+  const viaCtrlV = await (await find('confirm-email')).getAttribute('value');
+  await pasteInto('confirm-email', () => driver.actions().keyDown(Key.SHIFT).sendKeys(Key.INSERT).keyUp(Key.SHIFT).perform());
+  const viaShiftInsert = await (await find('confirm-email')).getAttribute('value');
+  await pasteInto('confirm-email', () => driver.actions().keyDown(MOD).keyDown(Key.SHIFT).sendKeys('v').keyUp(Key.SHIFT).keyUp(MOD).perform());
+  const viaPlainPaste = await (await find('confirm-email')).getAttribute('value');
+  await pasteInto('delayed-clear', () => driver.actions().keyDown(MOD).sendKeys('v').keyUp(MOD).perform());
+  await pasteInto('formatter', () => driver.actions().keyDown(MOD).sendKeys('v').keyUp(MOD).perform());
+  await sleep(1500);
+  const delayedValue = await (await find('delayed-clear')).getAttribute('value');
+  const formatterValue = await (await find('formatter')).getAttribute('value');
+  check('confirm field: Ctrl+V sticks', viaCtrlV.startsWith('Copy this.'), JSON.stringify(viaCtrlV));
+  check('confirm field: Shift+Insert sticks', viaShiftInsert.startsWith('Copy this.'), JSON.stringify(viaShiftInsert));
+  check('confirm field: Ctrl+Shift+V sticks', viaPlainPaste.startsWith('Copy this.'), JSON.stringify(viaPlainPaste));
+  check('paste wiped later by a timer is put back', delayedValue.startsWith('Copy this.'), JSON.stringify(delayedValue));
+  check('legit reformatting of a paste is left alone', formatterValue.startsWith('COPY THIS.'), JSON.stringify(formatterValue));
+
   await (await find('editor')).click();
   await driver.actions().keyDown(MOD).sendKeys('v').keyUp(MOD).perform();
   const editorText = await driver.findElement(By.id('editor')).getText();
@@ -107,7 +131,8 @@ try {
   await driver.actions().keyDown(Key.SHIFT).keyDown(MOD).sendKeys('i').keyUp(MOD).keyUp(Key.SHIFT).perform();
 
   const log = await pageLog();
-  const blocked = log.filter((l) => l.startsWith('page') && l !== 'page showed selection popup');
+  // Wiping happens in the page (we can't stop it), we put the value back afterwards.
+  const blocked = log.filter((l) => l.startsWith('page') && l !== 'page showed selection popup' && !l.startsWith('page wiped'));
   check('page scripts never got to block anything', blocked.length === 0, JSON.stringify(blocked));
   check('page selection popup never fired', !log.includes('page showed selection popup'));
   check('editor handler ran', log.includes('editor handled paste'), JSON.stringify(log));

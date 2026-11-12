@@ -1,6 +1,6 @@
 {
   "name": "copy-rights",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Firefox extension: stop sites from messing with selection, copy, paste and right-click.",
   "license": "MIT",

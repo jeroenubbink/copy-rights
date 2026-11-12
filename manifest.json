@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Copy Rights",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Your screen, your text. Stops sites from blocking selection, copy, paste, right-click and view-source, and from popping custom junk over selected text. On everywhere by default.",
   "homepage_url": "https://github.com/jeroenubbink/copy-rights",
   "icons": {
