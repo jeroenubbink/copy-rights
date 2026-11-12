@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Copy Rights torture page</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 760px; margin: 2em auto; padding: 0 16px; }
+  .noselect { user-select: none !important; -webkit-user-select: none !important; }
+  .invisible-selection::selection { background: transparent; color: inherit; }
+  #popup { position: absolute; display: none; background: #222; color: #fff; padding: 4px 10px; border-radius: 4px; }
+  #log { font: 12px monospace; background: #f4f4f4; padding: 8px; white-space: pre-wrap; min-height: 6em; }
+  section { border: 1px solid #ccc; padding: 8px 12px; margin: 12px 0; }
+</style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+<h1>Copy Rights torture page</h1>
+<p>Every hostile trick below should be defeated with the extension on, and work again once you click "Let this site do its thing".</p>
+
+<section id="s-noselect" class="noselect">
+  <h2>1. user-select: none !important</h2>
+  <p id="noselect-text">You should be able to select this sentence even though CSS says no.</p>
+</section>
+
+<section>
+  <h2>2. Inline !important user-select</h2>
+  <p id="inline-text" style="user-select: none !important">Inline style says no. Select me anyway.</p>
+</section>
+
+<section>
+  <h2>3. Invisible selection highlight</h2>
+  <p id="invisible-text" class="invisible-selection">Selecting this should show a normal highlight.</p>
+</section>
+
+<section>
+  <h2>4. Copy blocking and attribution spam</h2>
+  <p id="copy-text">Copy this. You should get exactly this text, no "Read more at" junk.</p>
+</section>
+
+<section>
+  <h2>5. Paste blocking</h2>
+  <input id="paste-input" placeholder="Paste here (blocked via paste, keydown and beforeinput)" size="50">
+</section>
+
+<section>
+  <h2>6. Selection popup</h2>
+  <p id="popup-text">Select some of this text. No "Share this quote!" bubble should appear.</p>
+</section>
+
+<section>
+  <h2>7. Right click, Ctrl+U, F12</h2>
+  <p>Right-click anywhere: native menu. Ctrl+U / F12 / Ctrl+Shift+I should work.</p>
+</section>
+
+<section>
+  <h2>8. Rich editor (left alone so the app keeps working)</h2>
+  <div id="editor" contenteditable="true" style="border:1px dashed #999;padding:6px">This editor handles paste itself and upper-cases it.</div>
+</section>
+
+<div id="popup">Share this quote!</div>
+<h2>Page log (what the page's scripts managed to do)</h2>
+<div id="log"></div>
+
+<script>
+  const log = (msg) => { document.getElementById('log').textContent += msg + '\n'; window.__log = (window.__log || []).concat(msg); };
+  const no = (name) => (e) => { e.preventDefault(); log('page blocked ' + name); return false; };
+
+  document.oncontextmenu = no('contextmenu (document.on*)');
+  document.addEventListener('contextmenu', no('contextmenu'));
+  document.addEventListener('selectstart', no('selectstart'));
+  document.addEventListener('dragstart', no('dragstart'));
+  document.addEventListener('copy', (e) => {
+    e.clipboardData.setData('text/plain', window.getSelection() + '\n\nRead more at https://example.com');
+    e.preventDefault();
+    log('page hijacked copy');
+  });
+  document.addEventListener('cut', no('cut'));
+
+  const input = document.getElementById('paste-input');
+  input.addEventListener('paste', no('paste'));
+  input.addEventListener('beforeinput', (e) => { if (e.inputType === 'insertFromPaste') no('beforeinput paste')(e); });
+  input.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'v') no('ctrl+v')(e); });
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && (k === 'u' || k === 'c' || (e.shiftKey && 'ijc'.includes(k))))) {
+      no('shortcut ' + (e.ctrlKey ? 'ctrl+' : '') + (e.shiftKey ? 'shift+' : '') + e.key)(e);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    const sel = window.getSelection();
+    if (!sel.isCollapsed) {
+      const r = sel.getRangeAt(0).getBoundingClientRect();
+      const p = document.getElementById('popup');
+      p.style.display = 'block';
+      p.style.left = (r.left + window.scrollX) + 'px';
+      p.style.top = (r.top + window.scrollY - 32) + 'px';
+      log('page showed selection popup');
+    }
+  });
+  document.addEventListener('selectionchange', () => {
+    if (!window.getSelection().isCollapsed) window.__sawSelectionChange = true;
+  });
+
+  const editor = document.getElementById('editor');
+  editor.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain').toUpperCase();
+    document.execCommand('insertText', false, text);
+    log('editor handled paste');
+  });
+</script>
+</body>
+</html>

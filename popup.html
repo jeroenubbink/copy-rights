@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="icons/on.svg" alt="" width="20" height="20">
+    <h1>Copy Rights</h1>
+    <label class="switch" title="Master switch">
+      <input type="checkbox" id="enabled">
+      <span>Enabled</span>
+    </label>
+  </header>
+
+  <section id="site">
+    <p id="status"></p>
+    <button id="toggle-site"></button>
+    <p class="hint">Rich web apps (online editors, maps, design tools) sometimes need their own right-click or clipboard handling. Let those sites do their thing.</p>
+  </section>
+
+  <section>
+    <h2>Sites doing their own thing</h2>
+    <ul id="allowlist"></ul>
+    <p id="empty" class="hint">None. Copy Rights is guarding every site.</p>
+  </section>
+
+  <section id="permission" hidden>
+    <p>Copy Rights needs access to all websites to work.</p>
+    <button id="grant">Grant access</button>
+  </section>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Copy Rights",
+  "version": "1.0.0",
+  "description": "Your screen, your text. Stops sites from blocking selection, copy, paste, right-click and view-source, and from popping custom junk over selected text. On everywhere by default.",
+  "homepage_url": "https://github.com/jeroenubbink/copy-rights",
+  "icons": {
+    "48": "icons/on.svg",
+    "96": "icons/on.svg"
+  },
+  "action": {
+    "default_icon": "icons/on.svg",
+    "default_title": "Copy Rights",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "copy-rights@jeroenubbink.github.io",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": { "required": ["none"] }
+    }
+  }
+}
